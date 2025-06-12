@@ -57,6 +57,27 @@ spec:
             - name: kind
               value: task
           resolver: bundles
+      - name: slack-webhook-notification
+        params:
+          - name: message
+            value: ":x: *VolSync FBC 4.18* PipelineRun failed: https://konflux-ui.apps.stone-prd-rh01.pg1f.p1.openshiftapps.com/ns/volsync-tenant/applications/volsync-fbc-4-18/pipelineruns/$(context.pipelineRun.name)"
+          - name: secret-name
+            value: slack-notification-secret
+          - name: key-name
+            value: backup-team
+        taskRef:
+          params:
+            - name: bundle
+              value: quay.io/konflux-ci/tekton-catalog/task-slack-webhook-notification@sha256:452188df385218d0a1d9d097ff5daa67f11ae3597c917a3c2bb644787453a8e0
+            - name: name
+              value: slack-webhook-notification
+            - name: kind
+              value: Task
+          resolver: bundles
+        when:
+          - input: $(tasks.status)
+            operator: in
+            values: ["Failed"]
     params:
       - description: Source Repository URL
         name: git-url
