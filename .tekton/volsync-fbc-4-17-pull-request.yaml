@@ -35,7 +35,7 @@ spec:
       value: "true"
     - name: build-args
       value:
-        - IMAGE=registry.redhat.io/openshift4/ose-operator-registry-rhel9:v4.17
+        - OPM_IMAGE=registry.redhat.io/openshift4/ose-operator-registry-rhel9:v4.17
         - INPUT_DIR=catalog-4-17
   pipelineSpec:
     description: |
