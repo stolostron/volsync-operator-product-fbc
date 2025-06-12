@@ -18,15 +18,15 @@ COPY --from=builder /configs /configs
 COPY --from=builder /tmp/cache /tmp/cache
 
 # Set FBC-specific label for the location of the FBC root directory in the image
-#LABEL operators.operatorframework.io.bundle.mediatype.v1=registry+v1
-#LABEL operators.operatorframework.io.bundle.manifests.v1=manifests/
-#LABEL operators.operatorframework.io.bundle.metadata.v1=metadata/
-#LABEL operators.operatorframework.io.bundle.package.v1=volsync-product
-#LABEL operators.operatorframework.io.bundle.channels.v1=alpha
-#LABEL operators.operatorframework.io.metrics.builder=operator-sdk-v1.33.1
-#LABEL operators.operatorframework.io.metrics.mediatype.v1=metrics+v1
-#LABEL operators.operatorframework.io.metrics.project_layout=go.kubebuilder.io/v3
-#LABEL operators.operatorframework.io.index.configs.v1=/configs
+LABEL operators.operatorframework.io.index.configs.v1=/configs
+LABEL operators.operatorframework.io.bundle.mediatype.v1=registry+v1
+LABEL operators.operatorframework.io.bundle.manifests.v1=manifests/
+LABEL operators.operatorframework.io.bundle.metadata.v1=metadata/
+LABEL operators.operatorframework.io.bundle.package.v1=volsync-product
+LABEL operators.operatorframework.io.bundle.channels.v1=alpha
+LABEL operators.operatorframework.io.metrics.builder=operator-sdk-v1.33.1
+LABEL operators.operatorframework.io.metrics.mediatype.v1=metrics+v1
+LABEL operators.operatorframework.io.metrics.project_layout=go.kubebuilder.io/v3
 
 ENTRYPOINT ["/bin/opm"]
 CMD ["serve", "/configs", "--cache-dir=/tmp/cache"]
