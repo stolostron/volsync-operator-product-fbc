@@ -52,3 +52,20 @@ index for the `volsync-product` operator package:
    ```bash
    ./build/render-catalog.sh
    ```
+
+## Testing an FBC image
+
+A catalog source can be created pointing to the FBC image as follows:
+
+```yaml
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: fbc-test-catalogsource
+  namespace: openshift-marketplace
+spec:
+  sourceType: grpc
+  image: quay.io/redhat-user-workloads/<tenant>-tenant/<fbc-image>@sha256:<digest>
+  displayName: Konflux FBC test CatalogSource
+  publisher: Red Hat
+```
