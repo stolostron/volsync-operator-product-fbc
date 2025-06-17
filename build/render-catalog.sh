@@ -43,3 +43,32 @@ for catalog_file in ${catalogs}; do
 done
 
 rm catalog-template-*.yaml
+
+# Use oldest catalog to populate bundle names for reference
+oldest_catalog=$(find catalog-* -type d | head -1)
+
+for bundle in "${oldest_catalog}"/bundles/*.yaml; do
+  bundle_image=$(yq '.image' "${bundle}")
+  bundle_name=$(yq '.name' "${bundle}")
+
+  yq '.entries[] |= select(.image == "'"${bundle_image}"'").name = "'"${bundle_name}"'"' -i catalog-template.yaml
+done
+
+# Sort catalog
+yq '.entries |= (sort_by(.schema, .name) | reverse)' -i catalog-template.yaml
+yq '.entries |=
+    [(.[] | select(.schema == "olm.package"))] +
+   ([(.[] | select(.schema == "olm.channel"))] | sort_by(.name)) +
+   ([(.[] | select(.schema == "olm.bundle"))] | sort_by(.name))' -i catalog-template.yaml
+
+# Fix sed issues on mac by using GSED
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+SED="sed"
+if [ "${OS}" == "darwin" ]; then
+  SED="gsed"
+fi
+
+# Replace the Konflux images with production images
+for file in catalog-template.yaml catalog-*/bundles/*.yaml; do
+  ${SED} -i -E 's%quay.io/redhat-user-workloads/[^@]+%registry.redhat.io/rhacm2/volsync-operator-bundle%g' "${file}"
+done
