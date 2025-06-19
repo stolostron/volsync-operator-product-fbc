@@ -1,0 +1,15 @@
+---
+apiVersion: operator.openshift.io/v1alpha1
+kind: ImageDigestMirrorSet
+metadata:
+  name: volsync-mirror-set
+spec:
+  imageDigestMirrors:
+    - mirrorSourcePolicy: AllowContactingSource
+      mirrors:
+        - quay.io/redhat-user-workloads/volsync-tenant/volsync-bundle-0-13
+      source: registry.redhat.io/rhacm2/volsync-operator-bundle
+    - mirrorSourcePolicy: AllowContactingSource
+      mirrors:
+        - quay.io/redhat-user-workloads/volsync-tenant/volsync-0-13
+      source: registry.redhat.io/rhacm2/volsync-rhel9
