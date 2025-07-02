@@ -1,5 +1,5 @@
 ---
-image: registry.redhat.io/rhacm2/volsync-operator-bundle@sha256:a4e54c13c7dd62b546d58987a0b7c5422beb1f8da86a7887c3bb9bd6255b0bc1
+image: registry.redhat.io/rhacm2/volsync-operator-bundle@sha256:1eeb6dbaf91cb8fd41dae5d5b7fa3d21c484f256f21caf1d0720fec87fa0fb10
 name: volsync-product.v0.13.0
 package: volsync-product
 properties:
@@ -73,7 +73,7 @@ properties:
             }
           ]
         capabilities: Basic Install
-        containerImage: registry.redhat.io/rhacm2/volsync-rhel9@sha256:f51f654ff86560ee553d46e893c77f098344d4104d3118d120be2e26aea803fb
+        containerImage: registry.redhat.io/rhacm2/volsync-rhel9@sha256:6925fbace172bb2e2047a5a6ee4ebd6705e27ea77d1f2a3b03c2e3e7a96830f7
         createdAt: "2025-04-23T18:50:13Z"
         features.operators.openshift.io/cnf: "false"
         features.operators.openshift.io/cni: "false"
@@ -203,10 +203,10 @@ properties:
       provider:
         name: Red Hat
 relatedImages:
-  - image: registry.redhat.io/rhacm2/volsync-operator-bundle@sha256:a4e54c13c7dd62b546d58987a0b7c5422beb1f8da86a7887c3bb9bd6255b0bc1
+  - image: registry.redhat.io/rhacm2/volsync-operator-bundle@sha256:1eeb6dbaf91cb8fd41dae5d5b7fa3d21c484f256f21caf1d0720fec87fa0fb10
     name: ""
   - image: registry.redhat.io/openshift4/ose-kube-rbac-proxy-rhel9@sha256:d37a6d10b0fa07370066a31fdaffe2ea553faf4e4e98be7fcef5ec40d62ffe29
     name: ""
-  - image: registry.redhat.io/rhacm2/volsync-rhel9@sha256:f51f654ff86560ee553d46e893c77f098344d4104d3118d120be2e26aea803fb
+  - image: registry.redhat.io/rhacm2/volsync-rhel9@sha256:6925fbace172bb2e2047a5a6ee4ebd6705e27ea77d1f2a3b03c2e3e7a96830f7
     name: ""
 schema: olm.bundle
