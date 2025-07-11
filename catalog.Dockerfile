@@ -8,7 +8,7 @@ FROM ${OPM_IMAGE} as builder
 
 # Copy specified FBC catalog into image at /configs and pre-populate serve cache
 ARG INPUT_DIR
-COPY ./${INPUT_DIR}/ /configs/catalog/volsync-product
+COPY ./${INPUT_DIR}/ /configs/volsync-product
 RUN ["/bin/opm", "serve", "/configs", "--cache-dir=/tmp/cache", "--cache-only"]
 
 # The base image is expected to contain /bin/opm (with serve subcommand) and /bin/grpc_health_probe
