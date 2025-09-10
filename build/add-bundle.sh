@@ -14,6 +14,13 @@ if [[ -z "${bundle_image}" ]]; then
   exit 1
 fi
 
+# Validate bundle image format
+if [[ ! "${bundle_image}" =~ ^quay\.io/redhat-user-workloads/volsync-tenant/volsync-bundle-[0-9]+-[0-9]+@sha256:[a-f0-9]+$ ]]; then
+  echo "error: the bundle image must follow the pattern:"
+  echo "  ./build/add-bundle.sh quay.io/redhat-user-workloads/volsync-tenant/volsync-bundle-X-Y@sha256:<sha>"
+  exit 1
+fi
+
 # Parse bundle
 bundle_json=$(skopeo inspect --override-os=linux --override-arch=amd64 "docker://${bundle_image}")
 bundle_digest=$(echo "${bundle_json}" | jq -r ".Digest")
