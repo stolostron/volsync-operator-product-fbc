@@ -8,8 +8,11 @@ entries:
     skipRange: '>=0.4.0 <0.12.1'
     skips:
       - volsync-product.v0.12.1
-  - name: volsync-product.v0.13.0
+  - name: volsync-product.v0.12.2
     replaces: volsync-product.v0.12.1-0.1749677898.p
+    skipRange: '>=0.4.0 <0.12.2'
+  - name: volsync-product.v0.13.0
+    replaces: volsync-product.v0.12.2
     skipRange: '>=0.4.0 <0.13.0'
 name: stable
 package: volsync-product
