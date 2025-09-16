@@ -36,6 +36,7 @@ rm -rf catalog-*/
 for catalog_file in ${catalogs}; do
   catalog_dir=${catalog_file%\.yaml}
   echo "Decomposing ${catalog_file} into directory for consumability: ${catalog_dir}/ ..."
+  mkdir -p "${catalog_dir}"/{bundles,channels}
   yq 'select(.schema == "olm.bundle")' -s '"'"${catalog_dir}"'/bundles/bundle-v" + (.properties[] | select(.type == "olm.package").value.version) + ".yaml"' "${catalog_file}"
   yq 'select(.schema == "olm.channel")' -s '"'"${catalog_dir}"'/channels/channel-" + (.name) + ".yaml"' "${catalog_file}"
   yq 'select(.schema == "olm.package")' -s '"'"${catalog_dir}"'/package.yaml"' "${catalog_file}"
