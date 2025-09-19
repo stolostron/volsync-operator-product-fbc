@@ -15,6 +15,9 @@ entries:
   - name: volsync-product.v0.13.0
     replaces: volsync-product.v0.12.2
     skipRange: '>=0.4.0 <0.13.0'
+  - name: volsync-product.v0.13.1
+    replaces: volsync-product.v0.13.0
+    skipRange: '>=0.4.0 <0.13.1'
 name: stable
 package: volsync-product
 schema: olm.channel
