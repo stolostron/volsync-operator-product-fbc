@@ -1,6 +1,6 @@
 ---
-image: registry.redhat.io/rhacm2/volsync-operator-bundle@sha256:7de09e5394985cdec87f5afab65b3343b8a37c0eb7f778774b21933ae69d691c
-name: volsync-product.v0.12.2
+image: registry.redhat.io/rhacm2/volsync-operator-bundle@sha256:32cd9b5812506656ff9ff1c2c9fdacde44f179313ea2bfbbc18564fee635ca67
+name: volsync-product.v0.13.1
 package: volsync-product
 properties:
   - type: olm.gvk
@@ -16,7 +16,7 @@ properties:
   - type: olm.package
     value:
       packageName: volsync-product
-      version: 0.12.2
+      version: 0.13.1
   - type: olm.csv.metadata
     value:
       annotations:
@@ -73,8 +73,8 @@ properties:
             }
           ]
         capabilities: Basic Install
-        containerImage: registry.redhat.io/rhacm2/volsync-rhel9@sha256:7d1ac69fe3d0fddc66acdfce9361a4fc8dd3f549f66c98450f7a0e4c5cc893a0
-        createdAt: "2025-07-07T13:46:18Z"
+        containerImage: registry.redhat.io/rhacm2/volsync-rhel9@sha256:50840a92f947e739ef4e7cc1106341511221cd22901fc818f4f53697ef73045b
+        createdAt: "2025-08-27T13:12:05Z"
         features.operators.openshift.io/cnf: "false"
         features.operators.openshift.io/cni: "false"
         features.operators.openshift.io/csi: "false"
@@ -85,10 +85,10 @@ properties:
         features.operators.openshift.io/token-auth-aws: "false"
         features.operators.openshift.io/token-auth-azure: "false"
         features.operators.openshift.io/token-auth-gcp: "false"
-        olm.skipRange: '>=0.4.0 <0.12.2'
+        olm.skipRange: '>=0.4.0 <0.13.1'
         operators.openshift.io/valid-subscription: '["OpenShift Platform Plus", "Red Hat Advanced Cluster Management for Kubernetes"]'
-        operators.operatorframework.io/builder: operator-sdk-v1.31.0
-        operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
+        operators.operatorframework.io/builder: operator-sdk-v1.33.0
+        operators.operatorframework.io/project_layout: go.kubebuilder.io/v4
         repository: https://github.com/backube/volsync
         support: Red Hat
       apiServiceDefinitions: {}
@@ -156,7 +156,7 @@ properties:
         ### Documentation
 
         For documentation about installing and using the VolSync Operator with Red Hat Advanced Cluster Management for
-        Kubernetes, see [VolSync persistent volume replication service](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.13/html/business_continuity/business-cont-overview#volsync) in the Red Hat Advanced Cluster Management
+        Kubernetes, see [VolSync persistent volume replication service](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.14/html/business_continuity/business-cont-overview#volsync) in the Red Hat Advanced Cluster Management
         documentation.
 
         For additional information about the VolSync project, including features that might not be supported by Red Hat, see
@@ -192,7 +192,7 @@ properties:
         operatorframework.io/os.linux: supported
       links:
         - name: Documentation
-          url: https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.13/html/business_continuity/business-cont-overview#volsync
+          url: https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.14/html/business_continuity/business-cont-overview#volsync
         - name: Source
           url: https://github.com/backube/volsync
       maintainers:
@@ -203,10 +203,10 @@ properties:
       provider:
         name: Red Hat
 relatedImages:
+  - image: registry.redhat.io/rhacm2/volsync-operator-bundle@sha256:32cd9b5812506656ff9ff1c2c9fdacde44f179313ea2bfbbc18564fee635ca67
+    name: ""
   - image: registry.redhat.io/openshift4/ose-kube-rbac-proxy-rhel9@sha256:d37a6d10b0fa07370066a31fdaffe2ea553faf4e4e98be7fcef5ec40d62ffe29
     name: ""
-  - image: registry.redhat.io/rhacm2/volsync-operator-bundle@sha256:7de09e5394985cdec87f5afab65b3343b8a37c0eb7f778774b21933ae69d691c
-    name: ""
-  - image: registry.redhat.io/rhacm2/volsync-rhel9@sha256:7d1ac69fe3d0fddc66acdfce9361a4fc8dd3f549f66c98450f7a0e4c5cc893a0
+  - image: registry.redhat.io/rhacm2/volsync-rhel9@sha256:50840a92f947e739ef4e7cc1106341511221cd22901fc818f4f53697ef73045b
     name: ""
 schema: olm.bundle
