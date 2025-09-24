@@ -60,21 +60,54 @@ for channel in ${bundle_channels//,/ }; do
     new_channel=${new_channel} yq '.entries += env(new_channel)' -i catalog-template.yaml
   fi
 
-  entries_in_channel=$(yq '.entries[] | select(.schema == "olm.channel") | select(.name == "'"${channel}"'").entries | length' catalog-template.yaml)
-  if [[ "${entries_in_channel}" == "0" ]]; then
-    # No previous version to replace
-    echo "    adding first version to entries (no replaces version)"
-    channel_entry="
-      name: volsync-product.${bundle_version}
-      skipRange: '>=0.4.0 <${bundle_version#v}'
-    " yq '.entries[] |= select(.schema == "olm.channel") |= select(.name == "'"${channel}"'").entries += env(channel_entry)' -i catalog-template.yaml
-  else
-    replaces_version=$(yq '.entries[] | select(.schema == "olm.channel") | select(.name == "'"${channel}"'").entries[-1].name' catalog-template.yaml)
-    echo "    replaces_version is: ${replaces_version}"
-    channel_entry="
-      name: volsync-product.${bundle_version}
-      replaces: ${replaces_version}
-      skipRange: '>=0.4.0 <${bundle_version#v}'
-    " yq '.entries[] |= select(.schema == "olm.channel") |= select(.name == "'"${channel}"'").entries += env(channel_entry)' -i catalog-template.yaml
-  fi
+  # Extract-Process-Write approach: cleaner and more maintainable
+  echo "    processing channel entries for ${channel}"
+
+  # Step 1: Simply append new entry first (easier approach)
+  channel_entry="
+    name: volsync-product.${bundle_version}
+    skipRange: '>=0.4.0 <${bundle_version#v}'
+  " yq '.entries[] |= select(.schema == "olm.channel") |= select(.name == "'"${channel}"'").entries += env(channel_entry)' -i catalog-template.yaml
+
+  # Step 2: Sort the entries by name
+  yq '.entries[] |= select(.schema == "olm.channel") |= select(.name == "'"${channel}"'").entries |= sort_by(.name)' -i catalog-template.yaml
+
+  # Step 3: Fix replacement chain - handle 'skips' logic properly
+  # Get all entry names in sorted order
+  entry_names=($(yq '.entries[] | select(.schema == "olm.channel") | select(.name == "'"${channel}"'").entries[].name' catalog-template.yaml))
+
+  # First, collect all entries that are being skipped by other entries
+  skipped_entries=()
+  for entry_name in "${entry_names[@]}"; do
+    skipped_by_this_entry=($(yq '.entries[] | select(.schema == "olm.channel") | select(.name == "'"${channel}"'").entries[] | select(.name == "'"${entry_name}"'").skips[]?' catalog-template.yaml 2>/dev/null || true))
+    for skipped in "${skipped_by_this_entry[@]}"; do
+      skipped_entries+=("$skipped")
+    done
+  done
+
+  # Build replacement chain, keeping track of last non-skipped entry
+  last_non_skipped=""
+  for entry_name in "${entry_names[@]}"; do
+    # Check if this entry is being skipped
+    is_skipped=false
+    for skipped in "${skipped_entries[@]}"; do
+      if [[ "$entry_name" == "$skipped" ]]; then
+        is_skipped=true
+        break
+      fi
+    done
+
+    if [[ "$is_skipped" == "true" ]]; then
+      # Skipped entry: remove replaces field
+      yq '.entries[] |= select(.schema == "olm.channel") |= select(.name == "'"${channel}"'").entries |= map(select(.name == "'"${entry_name}"'") |= del(.replaces))' -i catalog-template.yaml
+    elif [[ -z "$last_non_skipped" ]]; then
+      # First non-skipped entry: remove replaces field
+      yq '.entries[] |= select(.schema == "olm.channel") |= select(.name == "'"${channel}"'").entries |= map(select(.name == "'"${entry_name}"'") |= del(.replaces))' -i catalog-template.yaml
+      last_non_skipped="$entry_name"
+    else
+      # This entry replaces the last non-skipped entry
+      yq '.entries[] |= select(.schema == "olm.channel") |= select(.name == "'"${channel}"'").entries |= map(select(.name == "'"${entry_name}"'").replaces = "'"${last_non_skipped}"'")' -i catalog-template.yaml
+      last_non_skipped="$entry_name"
+    fi
+  done
 done
