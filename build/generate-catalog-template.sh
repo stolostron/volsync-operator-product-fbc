@@ -64,7 +64,11 @@ echo
 # Prune old bundles
 echo "# Pruning bundles:"
 for bundle_image in $(yq '.entries[] | select(.schema == "olm.bundle").image' catalog-template.yaml); do
-  bundle_version=$(skopeo inspect --override-os=linux --override-arch=amd64 "docker://${bundle_image}" | jq -r ".Labels.version")
+  if ! bundle_json=$(skopeo inspect --override-os=linux --override-arch=amd64 "docker://${bundle_image}"); then
+    echo "Tip: The repository might be not in a clean state."
+    exit 1
+  fi
+  bundle_version=$(echo "${bundle_json}" | jq -r ".Labels.version")
   echo "  Found version: ${bundle_version}"
   pruned=0
   for ocp_version in ${ocp_versions}; do
