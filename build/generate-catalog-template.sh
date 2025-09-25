@@ -54,14 +54,9 @@ for channel in $(yq '.entries[] | select(.schema == "olm.channel").name' catalog
 
     done
 
-    # If Only one entry in this channel, make sure no "replaces" field (as there is nothing to replace)
-    #channel_entriess=$(yq '.entries[] | select(.schema == "olm.channel") | select(.name == "'"${channel}"'").entries' "catalog-template-${ocp_version//./-}.yaml")
-    #echo "###### CHANNEL entries for ${channel}: ${channel_entriess}" # TODO: remove
-    channel_entries=$(yq '.entries[] | select(.schema == "olm.channel") | select(.name == "'"${channel}"'").entries | length' "catalog-template-${ocp_version//./-}.yaml")
-    if [[ "${channel_entries}" == "1" ]]; then
-      echo "  - OCP: ${ocp_version} CHANNEL: ${channel} - removing replaces as there is only 1 entry"
-      yq '.entries[] |= select(.schema == "olm.channel") |= select(.name == "'"${channel}"'").entries[0] |= del(.replaces)' -i "catalog-template-${ocp_version//./-}.yaml"
-    fi
+    # Always remove "replaces" field from first entry (as there is nothing to replace)
+    echo "  - OCP: ${ocp_version} CHANNEL: ${channel} - removing replaces from first entry"
+    yq '.entries[] |= select(.schema == "olm.channel") |= select(.name == "'"${channel}"'").entries[0] |= del(.replaces)' -i "catalog-template-${ocp_version//./-}.yaml"
   done
 done
 echo
