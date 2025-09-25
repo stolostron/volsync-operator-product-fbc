@@ -1,7 +1,6 @@
 ---
 entries:
   - name: volsync-product.v0.7.1
-    replaces: volsync-product.v0.7.0
     skipRange: '>=0.4.0 <0.7.1'
   - name: volsync-product.v0.7.2
     replaces: volsync-product.v0.7.1
