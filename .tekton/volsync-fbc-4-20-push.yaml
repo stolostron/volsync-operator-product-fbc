@@ -43,6 +43,14 @@ spec:
       value:
         - OPM_IMAGE=brew.registry.redhat.io/rh-osbs/openshift-ose-operator-registry-rhel9:v4.20
         - INPUT_DIR=catalog-4-20
+    - name: send-slack-notification
+      value: "true"
+    - name: konflux-application-name
+      value: "volsync-fbc-4-20"
+    - name: slack-webhook-url-secret-name
+      value: "slack-notification-secret"
+    - name: slack-webhook-url-secret-key
+      value: "backup-team"
   pipelineRef:
     resolver: git
     params:
