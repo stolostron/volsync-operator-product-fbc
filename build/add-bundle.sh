@@ -111,3 +111,10 @@ for channel in ${bundle_channels//,/ }; do
     fi
   done
 done
+
+# Sort catalog
+yq '.entries |= (sort_by(.schema, .name) | reverse)' -i catalog-template.yaml
+yq '.entries |=
+    [(.[] | select(.schema == "olm.package"))] +
+   ([(.[] | select(.schema == "olm.channel"))] | sort_by(.name)) +
+   ([(.[] | select(.schema == "olm.bundle"))] | sort_by(.name))' -i catalog-template.yaml

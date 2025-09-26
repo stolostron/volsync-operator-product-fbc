@@ -54,14 +54,9 @@ for channel in $(yq '.entries[] | select(.schema == "olm.channel").name' catalog
 
     done
 
-    # If Only one entry in this channel, make sure no "replaces" field (as there is nothing to replace)
-    #channel_entriess=$(yq '.entries[] | select(.schema == "olm.channel") | select(.name == "'"${channel}"'").entries' "catalog-template-${ocp_version//./-}.yaml")
-    #echo "###### CHANNEL entries for ${channel}: ${channel_entriess}" # TODO: remove
-    channel_entries=$(yq '.entries[] | select(.schema == "olm.channel") | select(.name == "'"${channel}"'").entries | length' "catalog-template-${ocp_version//./-}.yaml")
-    if [[ "${channel_entries}" == "1" ]]; then
-      echo "  - OCP: ${ocp_version} CHANNEL: ${channel} - removing replaces as there is only 1 entry"
-      yq '.entries[] |= select(.schema == "olm.channel") |= select(.name == "'"${channel}"'").entries[0] |= del(.replaces)' -i "catalog-template-${ocp_version//./-}.yaml"
-    fi
+    # Always remove "replaces" field from first entry (as there is nothing to replace)
+    echo "  - OCP: ${ocp_version} CHANNEL: ${channel} - removing replaces from first entry"
+    yq '.entries[] |= select(.schema == "olm.channel") |= select(.name == "'"${channel}"'").entries[0] |= del(.replaces)' -i "catalog-template-${ocp_version//./-}.yaml"
   done
 done
 echo
@@ -69,7 +64,11 @@ echo
 # Prune old bundles
 echo "# Pruning bundles:"
 for bundle_image in $(yq '.entries[] | select(.schema == "olm.bundle").image' catalog-template.yaml); do
-  bundle_version=$(skopeo inspect --override-os=linux --override-arch=amd64 "docker://${bundle_image}" | jq -r ".Labels.version")
+  if ! bundle_json=$(skopeo inspect --override-os=linux --override-arch=amd64 "docker://${bundle_image}"); then
+    echo "Tip: The repository might be not in a clean state."
+    exit 1
+  fi
+  bundle_version=$(echo "${bundle_json}" | jq -r ".Labels.version")
   echo "  Found version: ${bundle_version}"
   pruned=0
   for ocp_version in ${ocp_versions}; do
