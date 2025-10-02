@@ -46,7 +46,7 @@ spec:
     - name: send-slack-notification
       value: "true"
     - name: konflux-application-name
-      value: "volsync-fbc-4-17"
+      value: "volsync-fbc"
     - name: slack-webhook-url-secret-name
       value: "slack-notification-secret"
     - name: slack-webhook-url-secret-key
