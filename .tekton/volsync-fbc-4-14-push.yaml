@@ -16,7 +16,7 @@ metadata:
       "catalog-4-14/***".pathChanged())
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: volsync-fbc-4-14
+    appstudio.openshift.io/application: volsync-fbc
     appstudio.openshift.io/component: volsync-fbc-4-14
     pipelines.appstudio.openshift.io/type: build
   name: volsync-fbc-4-14-on-push
@@ -46,7 +46,7 @@ spec:
     - name: send-slack-notification
       value: "true"
     - name: konflux-application-name
-      value: "volsync-fbc-4-14"
+      value: "volsync-fbc"
     - name: slack-webhook-url-secret-name
       value: "slack-notification-secret"
     - name: slack-webhook-url-secret-key
