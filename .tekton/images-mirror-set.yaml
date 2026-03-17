@@ -11,6 +11,7 @@ spec:
         - quay.io/redhat-user-workloads/volsync-tenant/volsync-bundle-0-13
         - quay.io/redhat-user-workloads/volsync-tenant/volsync-bundle-0-14
         - quay.io/redhat-user-workloads/volsync-tenant/volsync-bundle-0-15
+        - quay.io/redhat-user-workloads/volsync-tenant/volsync-bundle-0-16
       source: registry.redhat.io/rhacm2/volsync-operator-bundle
     - mirrorSourcePolicy: AllowContactingSource
       mirrors:
@@ -18,4 +19,5 @@ spec:
         - quay.io/redhat-user-workloads/volsync-tenant/volsync-0-13
         - quay.io/redhat-user-workloads/volsync-tenant/volsync-0-14
         - quay.io/redhat-user-workloads/volsync-tenant/volsync-0-15
+        - quay.io/redhat-user-workloads/volsync-tenant/volsync-0-16
       source: registry.redhat.io/rhacm2/volsync-rhel9
