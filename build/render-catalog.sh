@@ -45,16 +45,6 @@ done
 
 rm catalog-template-*.yaml
 
-# Use oldest catalog to populate bundle names for reference
-oldest_catalog=$(find catalog-* -type d | head -1)
-
-for bundle in "${oldest_catalog}"/bundles/*.yaml; do
-  bundle_image=$(yq '.image' "${bundle}")
-  bundle_name=$(yq '.name' "${bundle}")
-
-  yq '.entries[] |= select(.image == "'"${bundle_image}"'").name = "'"${bundle_name}"'"' -i catalog-template.yaml
-done
-
 # Fix sed issues on mac by using GSED
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 SED="sed"
