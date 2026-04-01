@@ -40,6 +40,7 @@ fi
 bundle_entry="
   image: ${bundle_image}
   schema: olm.bundle
+  name: volsync-product.${bundle_version}
 " yq '.entries += env(bundle_entry)' -i catalog-template.yaml
 
 # Add bundle to channels

@@ -7,81 +7,105 @@ if [[ $(basename "${PWD}") != "volsync-operator-product-fbc" ]]; then
   exit 1
 fi
 
-echo "Using drop version Volsync-Product map:"
-jq '.' drop-versions.json
+echo "Using supported version Volsync-Product map:"
+jq '.' supported-versions.json
 
-ocp_versions=$(jq -r 'keys[]' drop-versions.json)
+ocp_versions=$(jq -r 'keys[]' supported-versions.json)
 
-shouldPrune() {
-  oldest_version="$(jq -r ".[\"${1}\"]" drop-versions.json).99"
-
-  [[ "$(printf "%s\n%s\n" "${2}" "${oldest_version}" | sort --version-sort | tail -1)" == "${oldest_version}" ]]
-
-  return $?
+# Version comparison helpers relying on bash's built-in version sort
+version_lt() {
+  [[ "$1" != "$2" && "$1" == "$(printf "%s\n%s" "$1" "$2" | sort --version-sort | head -n1)" ]]
 }
 
+version_gt() {
+  [[ "$1" != "$2" && "$1" == "$(printf "%s\n%s" "$1" "$2" | sort --version-sort | tail -n1)" ]]
+}
+
+# Evaluates if a version is outside the supported range (bounds are inclusive).
+# Returns 0 (true) to prune, 1 (false) to keep.
+shouldPrune() {
+  local target_version="$1"
+  local min="$2"
+  local max="$3"
+
+  if [[ -n "${min}" ]] && version_lt "${target_version}" "${min}"; then
+    return 0
+  fi
+
+  if [[ -n "${max}" ]] && version_gt "${target_version}" "${max}"; then
+    return 0
+  fi
+
+  return 1
+}
+
+# Generate base templates for each OCP version
 for version in ${ocp_versions}; do
   cp catalog-template.yaml "catalog-template-${version//./-}.yaml"
 done
 
-# Prune old X.Y channels
+# Prune old and no longer supported X.Y channels
 echo "# Pruning channels:"
 for channel in $(yq '.entries[] | select(.schema == "olm.channel").name' catalog-template.yaml); do
   echo "  Found channel: ${channel}"
+  
   for ocp_version in ${ocp_versions}; do
-    # Special case, acm-2.6 channel was only there until OCP 4.14
-    if [ "${ocp_version}" != "4.14" ] && [ "${channel}" == "acm-2.6" ]; then
-      echo "  - Pruning channel from OCP ${ocp_version}: ${channel} ..."
-      yq '.entries[] |= select(.schema == "olm.channel") |= del(select(.name == "'"${channel}"'"))' -i "catalog-template-${ocp_version//./-}.yaml"
+    # Extract min and max for this specific OCP version
+    min="$(jq -r ".[\"${ocp_version}\"][\"min\"]" supported-versions.json)"
+    max="$(jq -r ".[\"${ocp_version}\"][\"max\"]" supported-versions.json)"
 
-      continue
-    fi
-
-    if shouldPrune "${ocp_version}" "${channel#*\-}"; then
-      echo "  - Pruning channel from OCP ${ocp_version}: ${channel} ..."
-      yq '.entries[] |= select(.schema == "olm.channel") |= del(select(.name == "'"${channel}"'"))' -i "catalog-template-${ocp_version//./-}.yaml"
-
-      continue
-    fi
-
-    # Prune old bundles from channels
-    for entry in $(yq '.entries[] | select(.schema == "olm.channel") | select(.name == "'"${channel}"'").entries[].name' catalog-template.yaml); do
-      version=${entry#*\.v}
-      if shouldPrune "${ocp_version}" "${version}"; then
-        echo "  - Pruning entry from OCP ${ocp_version}: ${entry}"
-        yq '.entries[] |= select(.schema == "olm.channel") |= select(.name == "'"${channel}"'").entries[] |= del(select(.name == "'"${entry}"'"))' -i "catalog-template-${ocp_version//./-}.yaml"
+    # Special case: acm-2.6 channel was only there until OCP 4.14
+    if [ "${channel}" == "acm-2.6" ]; then
+      if [ "${ocp_version}" != "4.14" ]; then
+        echo "  - Pruning channel from OCP ${ocp_version}: ${channel} ..."
+        yq '.entries[] |= select(.schema == "olm.channel") |= del(select(.name == "'"${channel}"'"))' -i "catalog-template-${ocp_version//./-}.yaml"
       fi
+      continue
+    fi
 
+    # Check if an entire minor-version channel (e.g., stable-0.10) should be pruned.
+    # We explicitly skip this check for "stable" because we never delete the stable channel itself.
+    if [ "${channel}" != "stable" ]; then
+      if shouldPrune "${channel#*\-}" "${min}" "${max}"; then
+        echo "  - Pruning channel from OCP ${ocp_version}: ${channel} ..."
+        yq '.entries[] |= select(.schema == "olm.channel") |= del(select(.name == "'"${channel}"'"))' -i "catalog-template-${ocp_version//./-}.yaml"
+        continue
+      fi
+    fi
+
+    # Prune old bundles from surviving channels
+    for entry in $(yq '.entries[] | select(.schema == "olm.channel" and .name == "'"${channel}"'").entries[].name' catalog-template.yaml); do
+      full_version=${entry#*\.v}
+      # Strip patch version to match supported-versions.json format
+      short_version=${full_version%.*}
+
+      if shouldPrune "${short_version}" "${min}" "${max}"; then
+        echo "  - Pruning entry from OCP ${ocp_version}: ${entry}"
+        yq -i 'del(.entries[] | select(.schema == "olm.channel" and .name == "'"${channel}"'").entries[] | select(.name == "'"${entry}"'"))' "catalog-template-${ocp_version//./-}.yaml"
+      fi
     done
 
-    # Always remove "replaces" field from first entry (as there is nothing to replace)
+    # Always remove "replaces" field from the first remaining entry
     echo "  - OCP: ${ocp_version} CHANNEL: ${channel} - removing replaces from first entry"
     yq '.entries[] |= select(.schema == "olm.channel") |= select(.name == "'"${channel}"'").entries[0] |= del(.replaces)' -i "catalog-template-${ocp_version//./-}.yaml"
   done
 done
 echo
 
-# Prune old bundles
+# Prune old no longer supported bundles
 echo "# Pruning bundles:"
-for bundle_image in $(yq '.entries[] | select(.schema == "olm.bundle").image' catalog-template.yaml); do
-  if ! bundle_json=$(skopeo inspect --override-os=linux --override-arch=amd64 "docker://${bundle_image}"); then
-    echo "Tip: The repository might be not in a clean state."
-    exit 1
-  fi
-  bundle_version=$(echo "${bundle_json}" | jq -r ".Labels.version")
-  echo "  Found version: ${bundle_version}"
-  pruned=0
+for bundle_name in $(yq '.entries[] | select(.schema == "olm.bundle").name' catalog-template.yaml); do
+  
+  full_version="${bundle_name#volsync-product.v}"
+  short_version="${full_version%.*}"
+
   for ocp_version in ${ocp_versions}; do
-    if shouldPrune "${ocp_version}" "${bundle_version#v}"; then
-      echo "  - Pruning bundle ${bundle_version} from OCP ${ocp_version} ..."
-      echo "    (image ref: ${bundle_image})"
-      yq '.entries[] |= select(.schema == "olm.bundle") |= del(select(.image == "'"${bundle_image}"'"))' -i "catalog-template-${ocp_version//./-}.yaml"
-    else
-      ((pruned += 1))
+    min="$(jq -r ".[\"${ocp_version}\"][\"min\"]" supported-versions.json)"
+    max="$(jq -r ".[\"${ocp_version}\"][\"max\"]" supported-versions.json)"
+
+    if shouldPrune "${short_version}" "${min}" "${max}"; then
+      echo "  - Pruning bundle ${bundle_name} from OCP ${ocp_version} ..."
+      yq -i 'del(.entries[] | select(.schema == "olm.bundle" and .name == "'"${bundle_name}"'"))' "catalog-template-${ocp_version//./-}.yaml"
     fi
   done
-  #if ((pruned == $(jq 'keys | length' drop-versions.json))); then
-  #  echo "  Nothing pruned--exiting."
-  #  break
-  #fi
 done
