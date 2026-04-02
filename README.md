@@ -6,9 +6,9 @@ This is based on/copied from gatekeeper-operator-fbc
 
 ## Initializing the catalog from a current operator index
 
-This step may not need to be re-done - was done with the oldest supported OCP at the time to generate
-the catalog-template - then the next step (Adding or removing OCP versions) can prune the older unsupported
-versions from older OCPs.
+This step may not need to be re-done. It was initially done with the oldest supported OCP at the time to generate
+the catalog-template. The next step (Adding or removing OCP versions) will then filter the catalog to include only the explicitly supported
+versions for each OCP release.
 
 Use the [build/fetch-catalog.sh](../build/fetch-catalog.sh) script to pulling from the OCP vX.Y
 index for the `volsync-product` operator package:
@@ -23,8 +23,33 @@ index for the `volsync-product` operator package:
    [konflux-release-data](https://gitlab.cee.redhat.com/releng/konflux-release-data/-/tree/main/tenants-config/cluster/stone-prd-rh01/tenants/volsync-tenant),
    adding or removing OCP versions as needed.
 2. If versions should be updated for an incoming or outgoing OCP version, update the
-   [drop-versions.json](../drop-versions.json) map, which maps an OCP version to the version of the
-   operator that should be dropped from the catalog.
+   [supported-versions.json](../supported-versions.json) map. This file dictates the allowed 
+   operator versions for each OCP release using a range defined by `min` and `max` boundaries 
+   (using the `X.Y` version format). 
+   
+   The generation scripts will filter the catalog to ensure only versions falling within this range are kept. You can use an empty string (`""`) to indicate that there is no boundary in that direction:
+   * **Empty `min` (`""`):** No lower boundary (includes everything up to the `max`).
+   * **Empty `max` (`""`):** No upper boundary (includes everything from the `min` onwards).
+   * **Empty `min` and `max` (`""`):** No boundaries at all (includes all available versions).
+
+   **Example format:**
+   ```json
+   {
+     "4.50": {
+       "min": "",
+       "max": ""
+     },
+     "4.51": {
+       "min": "0.8",
+       "max": "0.9"
+     },
+     "4.52": {
+       "min": "0.9",
+       "max": ""
+     }
+   }
+   ```
+
 3. Merge the PRs from Konflux corresponding to the addition or removal of the application. For
    additions, run the [pipeline-patch.sh](../.tekton/pipeline-patch.sh) script to patch the incoming
    pipeline with relevant updates.
@@ -40,11 +65,12 @@ index for the `volsync-product` operator package:
    ./build/add-bundle.sh quay.io/redhat-user-workloads/volsync-tenant/volsync-bundle-X-Y@sha256:<sha>
    ```
 
-2. Pruning previous catalogs without compelling reason is not allowed since it's already been
-   deployed to customers. However, we can prune catalogs for unreleased versions of OCP.
+2. Modifying catalogs for already-released OCP versions is generally not allowed since
+   they have already been deployed to customers. However, for unreleased versions of OCP,
+   you can define the exact set of allowed operator versions.
 
-   Update the OCP version <-> operator version map, [drop-versions.json](../drop-versions.json),
-   with the version of the operator to drop for any unreleased OCP version.
+   Update the OCP version <-> operator version map, [supported-versions.json](../supported-versions.json),
+   to explicitly declare the operator versions that should be included for that specific OCP release.
 
 3. Run the [build/generate-catalog-template.sh](../build/generate-catalog-template.sh) to regenerate
    the catalog template files:
