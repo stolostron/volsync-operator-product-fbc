@@ -236,7 +236,7 @@ entries:
   - image: registry.redhat.io/rhacm2/volsync-operator-bundle@sha256:dada417982350c8f5b0ea5285d5568ac2ca23cba871de64fa80c9d2af43de48c
     schema: olm.bundle
     name: volsync-product.v0.14.1
-  - image: registry.redhat.io/rhacm2/volsync-operator-bundle@sha256:e82aef5ca72efe687e0906de3a25eb67affa1c8cba34e20613882896c2b894fc
+  - image: registry.redhat.io/rhacm2/volsync-operator-bundle@sha256:3053d9922016840bb6e2a14c783b61cd1799e345139b4a799b35c444e4b19ebd
     schema: olm.bundle
     name: volsync-product.v0.14.2
   - image: registry.redhat.io/rhacm2/volsync-operator-bundle@sha256:17c6dbf4db85b3ca3b14fe72ed60b001add3a19eb7ebda6a2a35ca1271545bbe
