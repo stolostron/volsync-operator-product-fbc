@@ -18,6 +18,12 @@ set -euo pipefail
 REPO="stolostron/volsync-operator-product-fbc"
 NS="volsync-tenant"
 
+if ! oc -n "$NS" get components --no-headers -o name &>/dev/null; then
+  echo "ERROR: cannot access components in namespace '${NS}'." >&2
+  echo "Check that you are logged in (oc login) and KUBECONFIG points to the Konflux cluster." >&2
+  exit 1
+fi
+
 # --- args ---
 COMMIT="${1:?Usage: $0 <commit_sha> <volsync_version> <prod|dev> [no]}"
 VS_VER_FULL="${2:?Usage: $0 <commit_sha> <volsync_version> <prod|dev> [no]}"
