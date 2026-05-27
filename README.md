@@ -91,6 +91,24 @@ index for the `volsync-product` operator package:
    the image's release. In this case, you need to revert the bundle reference to the Konflux one for
    the script to complete.
 
+## Generating a Konflux Snapshot
+
+Use the [`gen-fbc-snapshot.sh`](gen-fbc-snapshot.sh) script to generate a Konflux Snapshot
+containing only the FBC components supported for a specific VolSync version. The script looks up
+[`supported-versions.json`](supported-versions.json) at the given commit to determine which OCP
+versions apply, then queries each component's `lastPromotedImage` from the Konflux cluster to
+build the snapshot YAML.
+
+**Prerequisites:** `gh`, `oc`, `jq`. `KUBECONFIG` must point to the Konflux cluster.
+
+```bash
+# Production snapshot
+./gen-fbc-snapshot.sh <commit_sha> <volsync_version> prod
+
+# Dev snapshot
+./gen-fbc-snapshot.sh <commit_sha> <volsync_version> dev
+```
+
 ## Testing an FBC image
 
 A catalog source can be created pointing to the FBC image as follows:
