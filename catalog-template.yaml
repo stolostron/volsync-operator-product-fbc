@@ -59,6 +59,9 @@ entries:
       - name: volsync-product.v0.16.0
         skipRange: '>=0.4.0 <0.16.0'
         replaces: volsync-product.v0.15.2
+      - name: volsync-product.v0.16.1
+        skipRange: '>=0.4.0 <0.16.1'
+        replaces: volsync-product.v0.16.0
     name: stable
     package: volsync-product
     schema: olm.channel
@@ -152,6 +155,9 @@ entries:
     entries:
       - name: volsync-product.v0.16.0
         skipRange: '>=0.4.0 <0.16.0'
+      - name: volsync-product.v0.16.1
+        skipRange: '>=0.4.0 <0.16.1'
+        replaces: volsync-product.v0.16.0
   - entries:
       - name: volsync-product.v0.7.1
         replaces: volsync-product.v0.7.0
@@ -272,6 +278,9 @@ entries:
   - image: registry.redhat.io/rhacm2/volsync-operator-bundle@sha256:c5cf48e5eedcc77f2d045efe97e3f9861ac88628549f3b05cf77b3b33b7d18f4
     schema: olm.bundle
     name: volsync-product.v0.16.0
+  - image: registry.redhat.io/rhacm2/volsync-operator-bundle@sha256:48e41808904fa3e21e00eda4930ee8d9eeb4fe26916e9502106f7bd8b44491dd
+    schema: olm.bundle
+    name: volsync-product.v0.16.1
   - image: registry.redhat.io/rhacm2/volsync-operator-bundle@sha256:94a9dec0ec4c0a03cb273c00e3656011e11941b4a99184f0a3ddee063f13206e
     schema: olm.bundle
     name: volsync-product.v0.5.2
